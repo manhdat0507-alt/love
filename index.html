@@ -55,7 +55,6 @@
         }
         .status-msg { margin-top: 10px; font-weight: bold; font-size: 14px; }
         
-        /* Hiệu ứng cho Icon buồn */
         .sad-icon {
             font-size: 70px;
             margin: 15px 0;
@@ -77,23 +76,20 @@
 <body>
 
     <div class="card">
-        <h1 id="question">Em có thích anh không? ❤️</h1>
+        <h1 id="question">Em có nhớ a ko? ❤️</h1>
         
-        <!-- Hai nút đứng yên song song nhau -->
         <div class="btn-container" id="btnGroup">
             <button class="btn-yes" onclick="selectYes()">CÓ! 🥰</button>
             <button class="btn-no" onclick="selectNo()">KHÔNG 🥺</button>
         </div>
 
-        <!-- Khung hiện ra khi bấm CÓ -->
         <div class="form-group" id="messageForm">
-            <p style="margin-bottom: 12px; color: #333; font-weight: 500;">Trả lời anh hoặc gợi ý địa điểm nhé:</p>
+            <p style="margin-bottom: 12px; color: #333; font-weight: 500;">em có muốn đi đâu chơi với a ko::</p>
             <input type="text" id="userNote" placeholder="Ví dụ: Có chứ, đi ăn lẩu/xem phim nha!...">
             <button class="btn-yes" onclick="sendToOracle('CÓ')" style="width: 100%;">Gửi cho anh 🚀</button>
             <div class="status-msg" id="statusMsg"></div>
         </div>
 
-        <!-- Khung hiện ra khi bấm KHÔNG -->
         <div class="form-group" id="sadContainer">
             <div class="sad-icon">😭</div>
             <p style="color: #555; font-size: 16px; margin-bottom: 10px;">Huhu... Anh buồn lắm luôn đó 💔</p>
@@ -105,7 +101,6 @@
     <script>
         const ORDS_API_URL = "https://oracleapex.com/ords/wksp_apexlegend/loves/response";
 
-        // Xử lý khi chọn CÓ
         function selectYes() {
             document.getElementById('question').innerText = "Em có muốn đi đâu chơi với anh không? 🥰";
             document.getElementById('btnGroup').style.display = 'none';
@@ -113,26 +108,20 @@
             document.getElementById('sadContainer').style.display = 'none';
         }
 
-        // Xử lý khi chọn KHÔNG
         function selectNo() {
             document.getElementById('question').innerText = "Anh buồn lắm đó...";
             document.getElementById('btnGroup').style.display = 'none';
             document.getElementById('messageForm').style.display = 'none';
             document.getElementById('sadContainer').style.display = 'block';
 
-            // Tự động ghi nhận câu trả lời "KHÔNG" về Oracle Database
             sendToOracle('KHÔNG', 'Em chọn KHÔNG rồi 😭');
         }
-
-        // Nút chọn lại nếu lỡ bấm nhầm
         function resetForm() {
             document.getElementById('question').innerText = "Em có thích anh không? ❤️";
             document.getElementById('btnGroup').style.display = 'flex';
             document.getElementById('messageForm').style.display = 'none';
             document.getElementById('sadContainer').style.display = 'none';
         }
-
-        // Hàm gửi dữ liệu về máy chủ Oracle APEX
         async function sendToOracle(answerType, customNote = null) {
             const noteText = customNote || document.getElementById('userNote').value;
             const statusMsg = (answerType === 'CÓ') ? document.getElementById('statusMsg') : document.getElementById('sadStatusMsg');
