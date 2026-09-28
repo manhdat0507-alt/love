@@ -16,24 +16,23 @@
             overflow: hidden;
         }
         .card {
-            background: rgba(255, 255, 255, 0.9);
+            background: rgba(255, 255, 255, 0.95);
             padding: 30px;
             border-radius: 20px;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
             text-align: center;
-            max-width: 400px;
+            max-width: 420px;
             width: 90%;
             position: relative;
             z-index: 10;
         }
-        h1 { color: #e91e63; margin-bottom: 20px; font-size: 24px; }
+        h1 { color: #e91e63; margin-bottom: 20px; font-size: 22px; line-height: 1.4; }
+        
         .btn-container {
             display: flex;
             justify-content: center;
             gap: 20px;
             margin-top: 25px;
-            min-height: 50px;
-            position: relative;
         }
         button {
             padding: 12px 30px;
@@ -45,15 +44,34 @@
             transition: transform 0.2s, background 0.3s;
         }
         .btn-yes { background: #e91e63; color: white; }
-        .btn-yes:hover { transform: scale(1.1); background: #d81b60; }
-        .btn-no { background: #757575; color: white; position: absolute; }
-        
-        .form-group { margin-top: 15px; display: none; }
+        .btn-yes:hover { transform: scale(1.05); background: #d81b60; }
+        .btn-no { background: #757575; color: white; }
+        .btn-no:hover { transform: scale(1.05); background: #616161; }
+
+        .form-group { margin-top: 20px; display: none; }
         input[type="text"] {
-            width: 100%; padding: 10px; border: 1px solid #ccc;
-            border-radius: 8px; margin-bottom: 10px; font-size: 14px;
+            width: 100%; padding: 12px; border: 1px solid #ccc;
+            border-radius: 8px; margin-bottom: 12px; font-size: 15px;
         }
-        .status-msg { margin-top: 10px; font-weight: bold; color: #4caf50; }
+        .status-msg { margin-top: 10px; font-weight: bold; font-size: 14px; }
+        
+        /* Hiệu ứng cho Icon buồn */
+        .sad-icon {
+            font-size: 70px;
+            margin: 15px 0;
+            animation: shake 0.6s ease-in-out;
+        }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-8px); }
+            40%, 80% { transform: translateX(8px); }
+        }
+        .retry-btn {
+            margin-top: 15px;
+            background: #ff9800;
+            font-size: 15px;
+            padding: 8px 20px;
+        }
     </style>
 </head>
 <body>
@@ -61,50 +79,71 @@
     <div class="card">
         <h1 id="question">Em có thích anh không? ❤️</h1>
         
+        <!-- Hai nút đứng yên song song nhau -->
         <div class="btn-container" id="btnGroup">
             <button class="btn-yes" onclick="selectYes()">CÓ! 🥰</button>
-            <button class="btn-no" id="btnNo" onmouseover="moveButton()" onclick="moveButton()">Không 😜</button>
+            <button class="btn-no" onclick="selectNo()">KHÔNG 🥺</button>
         </div>
 
-        <!-- Khung gửi lời nhắn khi chọn CÓ -->
+        <!-- Khung hiện ra khi bấm CÓ -->
         <div class="form-group" id="messageForm">
-            <p style="margin-bottom: 10px; color: #333;">Nhập lời nhắn nhỏ gửi cho anh nè:</p>
-            <input type="text" id="userNote" placeholder="Ví dụ: Tối nay đi ăn lẩu nhé!...">
-            <button class="btn-yes" onclick="sendToOracle()" style="width: 100%;">Gửi về Server 🚀</button>
+            <p style="margin-bottom: 12px; color: #333; font-weight: 500;">Trả lời anh hoặc gợi ý địa điểm nhé:</p>
+            <input type="text" id="userNote" placeholder="Ví dụ: Có chứ, đi ăn lẩu/xem phim nha!...">
+            <button class="btn-yes" onclick="sendToOracle('CÓ')" style="width: 100%;">Gửi cho anh 🚀</button>
             <div class="status-msg" id="statusMsg"></div>
+        </div>
+
+        <!-- Khung hiện ra khi bấm KHÔNG -->
+        <div class="form-group" id="sadContainer">
+            <div class="sad-icon">😭</div>
+            <p style="color: #555; font-size: 16px; margin-bottom: 10px;">Huhu... Anh buồn lắm luôn đó 💔</p>
+            <button class="retry-btn btn-yes" onclick="resetForm()">Chọn lại nha ❤️</button>
+            <div class="status-msg" id="sadStatusMsg"></div>
         </div>
     </div>
 
     <script>
-        // Thay đường dẫn REST API ORDS của bạn vào đây
-        const ORDS_API_URL = "https://YOUR_APEX_DOMAIN/ords/app/love/response";
+        const ORDS_API_URL = "https://oracleapex.com/ords/wksp_apexlegend/loves/response";
 
-        // Nút KHÔNG di chuyển ngẫu nhiên khi rê chuột tới gần
-        function moveButton() {
-            const btnNo = document.getElementById('btnNo');
-            const x = Math.random() * (window.innerWidth - 120);
-            const y = Math.random() * (window.innerHeight - 50);
-            btnNo.style.fixed = 'fixed';
-            btnNo.style.left = x + 'px';
-            btnNo.style.top = y + 'px';
-        }
-
+        // Xử lý khi chọn CÓ
         function selectYes() {
-            document.getElementById('question').innerText = "Anh biết mà! Dễ thương quá đi ❤️";
+            document.getElementById('question').innerText = "Em có muốn đi đâu chơi với anh không? 🥰";
             document.getElementById('btnGroup').style.display = 'none';
             document.getElementById('messageForm').style.display = 'block';
+            document.getElementById('sadContainer').style.display = 'none';
         }
 
-        // Hàm gửi dữ liệu về Oracle APEX Server bằng Fetch API
-        async function sendToOracle() {
-            const noteText = document.getElementById('userNote').value;
-            const statusMsg = document.getElementById('statusMsg');
-            
-            statusMsg.style.color = "#2196F3";
-            statusMsg.innerText = "Đang gửi dữ liệu về Oracle Database...";
+        // Xử lý khi chọn KHÔNG
+        function selectNo() {
+            document.getElementById('question').innerText = "Anh buồn lắm đó...";
+            document.getElementById('btnGroup').style.display = 'none';
+            document.getElementById('messageForm').style.display = 'none';
+            document.getElementById('sadContainer').style.display = 'block';
+
+            // Tự động ghi nhận câu trả lời "KHÔNG" về Oracle Database
+            sendToOracle('KHÔNG', 'Em chọn KHÔNG rồi 😭');
+        }
+
+        // Nút chọn lại nếu lỡ bấm nhầm
+        function resetForm() {
+            document.getElementById('question').innerText = "Em có thích anh không? ❤️";
+            document.getElementById('btnGroup').style.display = 'flex';
+            document.getElementById('messageForm').style.display = 'none';
+            document.getElementById('sadContainer').style.display = 'none';
+        }
+
+        // Hàm gửi dữ liệu về máy chủ Oracle APEX
+        async function sendToOracle(answerType, customNote = null) {
+            const noteText = customNote || document.getElementById('userNote').value;
+            const statusMsg = (answerType === 'CÓ') ? document.getElementById('statusMsg') : document.getElementById('sadStatusMsg');
+
+            if (statusMsg) {
+                statusMsg.style.color = "#2196F3";
+                statusMsg.innerText = "Đang gửi về Server...";
+            }
 
             const payload = {
-                answer: "CÓ",
+                answer: answerType,
                 note: noteText || "Không có lời nhắn",
                 user_agent: navigator.userAgent
             };
@@ -117,16 +156,22 @@
                 });
 
                 if (response.ok) {
-                    statusMsg.style.color = "#4CAF50";
-                    statusMsg.innerText = "✨ Đã gửi câu trả lời về máy chủ Oracle thành công!";
+                    if (statusMsg) {
+                        statusMsg.style.color = "#4CAF50";
+                        statusMsg.innerText = (answerType === 'CÓ') ? "✨ Đã gửi tin nhắn cho anh thành công!" : "(Đã ghi nhận câu trả lời)";
+                    }
                 } else {
-                    statusMsg.style.color = "#f44336";
-                    statusMsg.innerText = "Lỗi khi gửi (Status: " + response.status + ")";
+                    if (statusMsg) {
+                        statusMsg.style.color = "#f44336";
+                        statusMsg.innerText = "Lỗi khi gửi (Status: " + response.status + ")";
+                    }
                 }
             } catch (err) {
                 console.error(err);
-                statusMsg.style.color = "#f44336";
-                statusMsg.innerText = "Lỗi kết nối API! Kiểm tra lại URL ORDS hoặc CORS.";
+                if (statusMsg) {
+                    statusMsg.style.color = "#f44336";
+                    statusMsg.innerText = "Lỗi kết nối API Oracle!";
+                }
             }
         }
     </script>
