@@ -5,7 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Em có thích anh không?</title>
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; }
+        * { 
+            box-sizing: border-box; 
+            margin: 0; 
+            padding: 0; 
+        }
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 99%, #feada6 100%);
@@ -26,7 +30,12 @@
             position: relative;
             z-index: 10;
         }
-        h1 { color: #e91e63; margin-bottom: 20px; font-size: 22px; line-height: 1.4; }
+        h1 { 
+            color: #e91e63; 
+            margin-bottom: 20px; 
+            font-size: 22px; 
+            line-height: 1.4; 
+        }
         
         .btn-container {
             display: flex;
@@ -43,17 +52,44 @@
             cursor: pointer;
             transition: transform 0.2s, background 0.3s;
         }
-        .btn-yes { background: #e91e63; color: white; }
-        .btn-yes:hover { transform: scale(1.05); background: #d81b60; }
-        .btn-no { background: #757575; color: white; }
-        .btn-no:hover { transform: scale(1.05); background: #616161; }
-
-        .form-group { margin-top: 20px; display: none; }
-        input[type="text"] {
-            width: 100%; padding: 12px; border: 1px solid #ccc;
-            border-radius: 8px; margin-bottom: 12px; font-size: 15px;
+        .btn-yes { 
+            background: #e91e63; 
+            color: white; 
         }
-        .status-msg { margin-top: 10px; font-weight: bold; font-size: 14px; }
+        .btn-yes:hover { 
+            transform: scale(1.05); 
+            background: #d81b60; 
+        }
+        .btn-no { 
+            background: #757575; 
+            color: white; 
+        }
+        .btn-no:hover { 
+            transform: scale(1.05); 
+            background: #616161; 
+        }
+
+        .form-group { 
+            margin-top: 20px; 
+            display: none; 
+        }
+        input[type="text"] {
+            width: 100%; 
+            padding: 12px; 
+            border: 1px solid #ccc;
+            border-radius: 8px; 
+            margin-bottom: 12px; 
+            font-size: 15px;
+            outline: none;
+        }
+        input[type="text"]:focus {
+            border-color: #e91e63;
+        }
+        .status-msg { 
+            margin-top: 12px; 
+            font-weight: bold; 
+            font-size: 14px; 
+        }
         
         .sad-icon {
             font-size: 70px;
@@ -76,7 +112,7 @@
 <body>
 
     <div class="card">
-        <h1 id="question">Em có nhớ a ko? ❤️</h1>
+        <h1 id="question">Em có nhớ anh không? ❤️</h1>
         
         <div class="btn-container" id="btnGroup">
             <button class="btn-yes" onclick="selectYes()">CÓ! 🥰</button>
@@ -84,7 +120,7 @@
         </div>
 
         <div class="form-group" id="messageForm">
-            <p style="margin-bottom: 12px; color: #333; font-weight: 500;">em có muốn đi đâu chơi với a ko::</p>
+            <p style="margin-bottom: 12px; color: #333; font-weight: 500;">Em có muốn đi đâu chơi với anh không?</p>
             <input type="text" id="userNote" placeholder="Ví dụ: Có chứ, đi ăn lẩu/xem phim nha!...">
             <button class="btn-yes" onclick="sendToOracle('CÓ')" style="width: 100%;">Gửi cho anh 🚀</button>
             <div class="status-msg" id="statusMsg"></div>
@@ -116,14 +152,21 @@
 
             sendToOracle('KHÔNG', 'Em chọn KHÔNG rồi 😭');
         }
+
         function resetForm() {
-            document.getElementById('question').innerText = "Em có thích anh không? ❤️";
+            document.getElementById('question').innerText = "Em có nhớ anh không? ❤️";
             document.getElementById('btnGroup').style.display = 'flex';
             document.getElementById('messageForm').style.display = 'none';
             document.getElementById('sadContainer').style.display = 'none';
+            
+            document.getElementById('userNote').value = '';
+            document.getElementById('statusMsg').innerText = '';
+            document.getElementById('sadStatusMsg').innerText = '';
         }
+
         async function sendToOracle(answerType, customNote = null) {
-            const noteText = customNote || document.getElementById('userNote').value;
+            const noteInput = document.getElementById('userNote');
+            const noteText = customNote || (noteInput ? noteInput.value : '');
             const statusMsg = (answerType === 'CÓ') ? document.getElementById('statusMsg') : document.getElementById('sadStatusMsg');
 
             if (statusMsg) {
@@ -131,17 +174,18 @@
                 statusMsg.innerText = "Đang gửi về Server...";
             }
 
-            const payload = {
-                answer: answerType,
-                note: noteText || "Không có lời nhắn",
-                user_agent: navigator.userAgent
-            };
+            const params = new URLSearchParams();
+            params.append('answer', answerType);
+            params.append('note', noteText || 'Không có lời nhắn');
+            params.append('user_agent', navigator.userAgent);
 
             try {
                 const response = await fetch(ORDS_API_URL, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
+                    headers: { 
+                        'Content-Type': 'application/x-www-form-urlencoded' 
+                    },
+                    body: params.toString()
                 });
 
                 if (response.ok) {
